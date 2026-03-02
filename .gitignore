@@ -1,0 +1,52 @@
+# -------------------------
+# Dependencies
+# -------------------------
+node_modules/
+.pnpm-store/
+
+# -------------------------
+# Logs
+# -------------------------
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# -------------------------
+# Build output
+# -------------------------
+dist/
+build/
+coverage/
+
+# Frontend (Vite / React)
+apps/frontend/dist/
+
+# Backend
+apps/backend/dist/
+
+# -------------------------
+# Environment variables
+# -------------------------
+.env
+.env.*
+!.env.example
+
+# -------------------------
+# OS / Editor junk
+# -------------------------
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+
+# -------------------------
+# TypeScript (if added later)
+# -------------------------
+*.tsbuildinfo
+
+# -------------------------
+# Misc
+# -------------------------
+*.local
