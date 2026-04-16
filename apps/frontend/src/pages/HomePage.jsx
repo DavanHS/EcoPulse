@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiWind, FiActivity, FiCpu } from 'react-icons/fi';
+import { FiWind, FiActivity, FiCpu, FiMapPin, FiNavigation } from 'react-icons/fi';
 import { aqiService } from '../services/aqiService';
 import { historyService } from '../services/historyService';
 import { useAuth } from '../hooks/useAuth';
@@ -10,8 +10,39 @@ import ComparisonView from '../components/comparison/ComparisonView';
 import Loader from '../components/ui/Loader';
 import ErrorAlert from '../components/ui/ErrorAlert';
 
+const accuracyColors = {
+    high: { bg: 'bg-green-500/20', border: 'border-green-500/30', text: 'text-green-400', label: 'High Accuracy' },
+    moderate: { bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', text: 'text-yellow-400', label: 'Moderate Accuracy' },
+    low: { bg: 'bg-red-500/20', border: 'border-red-500/30', text: 'text-red-400', label: 'Low Accuracy' },
+};
+
+function StationInfo({ data }) {
+    const accuracy = accuracyColors[data.accuracy] || accuracyColors.low;
+    
+    return (
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-3">
+            {data.isEstimated && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-blue-500/20 border-blue-500/30 text-blue-400">
+                    Estimated for {data.location}
+                </div>
+            )}
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FiMapPin className="text-gray-500" />
+                <span>Station: {data.stationLocation}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FiNavigation className="text-gray-500" />
+                <span>{data.distanceKm} km away</span>
+            </div>
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${accuracy.bg} ${accuracy.border} ${accuracy.text}`}>
+                {accuracy.label}
+            </div>
+        </div>
+    );
+}
+
 export default function HomePage() {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const [aqiData, setAqiData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -31,7 +62,7 @@ export default function HomePage() {
                         locationSearched: data.location,
                         aqiValue: data.aqi,
                         dominantPollutant: data.dominantPollutant,
-                        aiRiskLevel: data.geminiAdvisory?.riskLevel,
+                        aiRiskLevel: data.geminiAdvisory?.riskLevel || null,
                     });
                 } catch {
                     // Silent catch for background metric
@@ -98,13 +129,17 @@ export default function HomePage() {
                     <section className="mb-20 animate-fade-in-up">
                         <div className="mb-8 flex flex-col items-center">
                             <p className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">Displaying real-time data for</p>
-                            <h2 className="text-3xl font-black text-white">{aqiData.location}</h2>
+                            <h2 className="text-3xl font-black text-white">{aqiData.location}, India</h2>
+                            {aqiData.stationLocation && <StationInfo data={aqiData} />}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 stagger">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 stagger">
                             <AqiCard label="aqi" value={aqiData.aqi} />
                             <AqiCard label="pm25" value={aqiData.pm25} unit="µg/m³" />
+                            <AqiCard label="pm10" value={aqiData.pm10} unit="µg/m³" />
                             <AqiCard label="no2" value={aqiData.no2} unit="ppb" />
+                            <AqiCard label="so2" value={aqiData.so2} unit="ppb" />
+                            <AqiCard label="o3" value={aqiData.o3} unit="ppb" />
                         </div>
 
                         {aqiData.geminiAdvisory && (

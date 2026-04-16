@@ -15,7 +15,8 @@ export default function HistoryPage() {
         const fetchHistory = async () => {
             try {
                 const data = await historyService.getHistory();
-                setHistory(Array.isArray(data) ? data : []);
+                const sorted = Array.isArray(data) ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
+                setHistory(sorted);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to load history.');
             } finally {
@@ -96,7 +97,10 @@ export default function HistoryPage() {
                                     <tbody className="divide-y divide-gray-800">
                                         {history.map((entry, i) => {
                                             const level = getAqiLevel(entry.aqiValue ?? 0);
-                                            const date = new Date(entry.timestamp);
+                                            const dateValue = entry.createdAt || entry.timestamp;
+                                            const date = dateValue ? new Date(dateValue) : null;
+                                            const isValidDate = date && !isNaN(date.getTime());
+                                            
                                             return (
                                                 <tr key={entry._id || i} className="hover:bg-gray-800/30 transition-colors">
                                                     <td className="px-6 py-5">
@@ -122,14 +126,20 @@ export default function HistoryPage() {
                                                     </td>
                                                     <td className="px-6 py-5">
                                                         <span className="text-gray-300">
-                                                            {entry.aiRiskLevel}/5
+                                                            {entry.aiRiskLevel ? `${entry.aiRiskLevel}/5` : '—'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-5 text-gray-500">
-                                                        {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                        <span className="mx-1.5 hidden sm:inline">·</span>
-                                                        <br className="sm:hidden" />
-                                                        {date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                                        {isValidDate ? (
+                                                            <>
+                                                                {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                <span className="mx-1.5 hidden sm:inline">·</span>
+                                                                <br className="sm:hidden" />
+                                                                {date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                                            </>
+                                                        ) : (
+                                                            '—'
+                                                        )}
                                                     </td>
                                                 </tr>
                                             );

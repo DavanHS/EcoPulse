@@ -6,14 +6,5 @@ export function useAuth() {
     if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
-    // --- ORIGINAL CODE ---
-    // return context;
-
-    // --- BYPASS ---
-    return {
-        ...context,
-        isAuthenticated: true,
-        user: { username: 'GuestReviewer', email: 'guest@example.com' },
-        loading: false
-    };
+    return context;
 }

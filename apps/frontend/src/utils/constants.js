@@ -41,6 +41,37 @@ export const BENGALURU_LOCALITIES = [
 // ── Pollutant labels ─────────────────────────────────
 export const POLLUTANT_LABELS = {
     pm25: 'PM₂.₅',
+    pm10: 'PM₁₀',
     no2: 'NO₂',
+    so2: 'SO₂',
+    o3: 'O₃',
+    co: 'CO',
     aqi: 'AQI',
 };
+
+// ── Pollutant-specific thresholds (India/CPCB standards) ─────────
+// Each pollutant has: safe (green), warning (yellow), danger (red)
+// Values: PM2.5, PM10 in µg/m³ | NO2, SO2, O3 in ppb | CO in ppm | AQI is unitless
+export const POLLUTANT_THRESHOLDS = {
+    pm25: { safe: 30, warning: 60, unit: 'µg/m³' },
+    pm10: { safe: 50, warning: 100, unit: 'µg/m³' },
+    no2: { safe: 40, warning: 80, unit: 'ppb' },
+    so2: { safe: 20, warning: 80, unit: 'ppb' },
+    o3: { safe: 50, warning: 100, unit: 'ppb' },
+    co: { safe: 1, warning: 2, unit: 'ppm' },
+    aqi: { safe: 50, warning: 100, unit: '' },
+};
+
+export function getPollutantLevel(pollutant, value) {
+    if (value === null || value === undefined) return null;
+    const thresholds = POLLUTANT_THRESHOLDS[pollutant];
+    if (!thresholds) return getAqiLevel(value);
+    
+    if (value <= thresholds.safe) {
+        return { level: 'safe', color: '#22c55e', label: 'Safe' };
+    } else if (value <= thresholds.warning) {
+        return { level: 'warning', color: '#eab308', label: 'Moderate' };
+    } else {
+        return { level: 'danger', color: '#ef4444', label: 'Poor' };
+    }
+}
